@@ -6,7 +6,7 @@ using RunGroopWebApp.Models;
 
 namespace RunGroopWebApp.Interfaces
 {
-    public interface IClubrepository
+    public interface IClubRepository
     {
         Task<IEnumerable<Club>> GetAll();
         Task<Club> GetByIdAsync(int id);
