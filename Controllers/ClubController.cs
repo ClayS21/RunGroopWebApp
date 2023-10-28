@@ -81,5 +81,66 @@ namespace RunGroopWebApp.Controllers
             };
             return View(clubVM);
         }
+
+        [HttpPost]
+        public async Task<IActionResult> Edit(int id, EditClubViewModel clubVM)
+        {
+            if(!ModelState.IsValid)
+            {
+                ModelState.AddModelError("", "Failed to edit club");
+                return View("Edit", clubVM);
+            }
+
+            var userClub = await _clubRepository.GetByIdAsyncNoTracking(id);
+            
+            if(userClub != null)
+            {
+                try
+                {
+                    await _photoService.DeletePhotoAsync(userClub.Image);
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", "Could not delete photo");
+                    return View(clubVM);
+                }
+
+                var photoResult = await _photoService.AddPhotoAsync(clubVM.Image);
+
+                var club = new Club
+                {
+                    Id = id,
+                    Title = clubVM.Title,
+                    Description = clubVM.Description,
+                    Image = photoResult.Url.ToString(),
+                    AddressId = clubVM.AddressId,
+                };
+
+                _clubRepository.Update(club);
+
+                return RedirectToAction("Index");
+            }
+            else
+            {
+                return View(clubVM);
+            }
+        }
+
+        public async Task<IActionResult> Delete(int id)
+        {
+            var clubDetails = await _clubRepository.GetByIdAsync(id);
+            if(clubDetails == null) return View("Error");
+            return View(clubDetails);
+        }
+
+        [HttpPost, ActionName("Delete")]
+        public async Task<IActionResult> DeleteClub(int id)
+        {
+            var clubDetails = await _clubRepository.GetByIdAsync(id);
+            if(clubDetails == null) return View("Error");
+
+            _clubRepository.Delete(clubDetails);
+            return RedirectToAction("Index");
+        }
     }
 }
