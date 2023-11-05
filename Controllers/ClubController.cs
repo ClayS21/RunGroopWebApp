@@ -32,7 +32,9 @@ namespace RunGroopWebApp.Controllers
 
         public IActionResult Create()
         {
-            return View();
+            var curUserId = HttpContext.User.GetUserId();
+            var createClubViewModel = new CreateClubViewModel {AppUserId = curUserId };
+            return View(createClubViewModel);
         }
 
         [HttpPost]
@@ -47,6 +49,7 @@ namespace RunGroopWebApp.Controllers
                     Title = clubVM.Title,
                     Description = clubVM.Description,
                     Image = result.Url.ToString(),
+                    AppUserId = clubVM.AppUserId,
                     Address = new Address
                     {
                         Street = clubVM.Address.Street,
